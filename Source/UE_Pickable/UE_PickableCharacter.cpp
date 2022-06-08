@@ -51,6 +51,20 @@ AUE_PickableCharacter::AUE_PickableCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void AUE_PickableCharacter::OnComponentBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor,
+	UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap"));
+}
+
+void AUE_PickableCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AUE_PickableCharacter::OnComponentBeginOverlap);
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -115,12 +129,12 @@ void AUE_PickableCharacter::MoveForward(float Value)
 
 void AUE_PickableCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
