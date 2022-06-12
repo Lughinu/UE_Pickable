@@ -31,6 +31,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
 		float TurnRateGamepad;
 
+	UPROPERTY(EditAnywhere, Category = "UI HUD")
+		TSubclassOf<UUserWidget> HealthBarWidgetClass = nullptr;
+
+
+
 protected:
 
 	/** Called for forwards/backward input */
@@ -57,10 +62,13 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
-protected:
+
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
+
+
+	UUserWidget* healthBarWidgetPtr = nullptr;
 
 public:
 	/** Returns CameraBoom subobject **/

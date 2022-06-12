@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UE_PickableCharacter.h"
+
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -54,7 +56,12 @@ AUE_PickableCharacter::AUE_PickableCharacter()
 void AUE_PickableCharacter::OnComponentBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor,
 	UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap"));
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap with: %s"), *Actor->GetActorLabel());
+
+	Actor->Destroy();
+
+
+
 }
 
 void AUE_PickableCharacter::BeginPlay()
@@ -63,6 +70,11 @@ void AUE_PickableCharacter::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &AUE_PickableCharacter::OnComponentBeginOverlap);
 
+	if (HealthBarWidgetClass != nullptr)
+	{
+		healthBarWidgetPtr = CreateWidget(GetWorld(), HealthBarWidgetClass);
+		healthBarWidgetPtr->AddToViewport();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
