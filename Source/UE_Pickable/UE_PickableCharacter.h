@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "UE_PickableCharacter.generated.h"
 
+
+class UUE_Pickable_GameplayUI;
+
 UCLASS(config = Game)
 class AUE_PickableCharacter : public ACharacter
 {
@@ -18,6 +21,7 @@ class AUE_PickableCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
+	bool isDead;
 public:
 	AUE_PickableCharacter();
 
@@ -26,6 +30,11 @@ public:
 			const FHitResult& HitResult);
 
 	virtual void BeginPlay() override;
+
+	void Pippo();
+	virtual void Tick(float DeltaSeconds) override;
+
+	void RestartGame();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input)
@@ -37,6 +46,8 @@ public:
 
 
 protected:
+
+	float health;
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -68,7 +79,7 @@ protected:
 	// End of APawn interface
 
 
-	UUserWidget* healthBarWidgetPtr = nullptr;
+	UUE_Pickable_GameplayUI* healthBarWidgetPtr = nullptr;
 
 public:
 	/** Returns CameraBoom subobject **/

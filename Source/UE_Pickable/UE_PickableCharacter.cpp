@@ -9,6 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UE_Pickable_GameplayUI.h"
+#include "Kismet/GameplayStatics.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AUE_PickableCharacter
@@ -49,14 +51,18 @@ AUE_PickableCharacter::AUE_PickableCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	health = 1;
+	isDead = false;
+
 }
 
 void AUE_PickableCharacter::OnComponentBeginOverlap(UPrimitiveComponent* PrimitiveComponent, AActor* Actor,
 	UPrimitiveComponent* PrimitiveComponent1, int I, bool bArg, const FHitResult& HitResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap with: %s"), *Actor->GetActorLabel());
+
+	health = FMath::Clamp(health + 0.1f, 0, 1);
+	healthBarWidgetPtr->SetHealthBar(health);
 
 	Actor->Destroy();
 
@@ -72,9 +78,37 @@ void AUE_PickableCharacter::BeginPlay()
 
 	if (HealthBarWidgetClass != nullptr)
 	{
-		healthBarWidgetPtr = CreateWidget(GetWorld(), HealthBarWidgetClass);
+		healthBarWidgetPtr = Cast<UUE_Pickable_GameplayUI>(CreateWidget(GetWorld(), HealthBarWidgetClass));
 		healthBarWidgetPtr->AddToViewport();
 	}
+}
+
+void AUE_PickableCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	health -= 0.001f;
+	healthBarWidgetPtr->SetHealthBar(health);
+
+	if (health <= 0)
+	{
+		if (!isDead)
+		{
+			isDead = true;
+			GetMesh()->SetSimulatePhysics(true);
+
+			FTimerHandle restartGameTimer;
+			GetWorldTimerManager().SetTimer(restartGameTimer, this, &AUE_PickableCharacter::RestartGame, 2.0f, false);
+
+
+		}
+
+
+	}
+}
+
+void AUE_PickableCharacter::RestartGame()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
 
 //////////////////////////////////////////////////////////////////////////
